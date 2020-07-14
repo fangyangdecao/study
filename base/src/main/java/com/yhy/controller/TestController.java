@@ -3,31 +3,57 @@ package com.yhy.controller;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.internal.LettuceLists;
 import io.lettuce.core.support.ConnectionPoolSupport;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
+import redis.clients.util.Pool;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("test")
 public class TestController {
-
-    @GetMapping("hello")
-    public String test(@RequestParam String name){
-        return "hello" + name;
-    }
-
+    private ApplicationContext applicationContext;
 
     @Autowired
     @Qualifier("LETTUCE_POOL")
     private GenericObjectPool<StatefulRedisConnection<String,String>> pool;
+
+    @Autowired
+    @Qualifier("JEDIS_POOL")
+    private Pool<Jedis> jedisPool;
+
+    @GetMapping("hello")
+    public String test(@RequestParam String name){
+        //Object lettuce_pool = applicationContext.getBean("redisPoolConfig");
+        try (Jedis jedis = jedisPool.getResource()) {
+            List<Response<Long>> objects = LettuceLists.newList();
+            Pipeline pp = jedis.pipelined();
+            for (int i = 0; i < 10; i++) {
+                Response<Long> key = pp.hset("key", "pp" + i, String.valueOf(i));
+                objects.add(key);
+            }
+            pp.sync();
+            for (Response<Long> object : objects) {
+                System.out.println(object.get());
+            }
+        }
+        return "hello" + name;
+    }
+
 
     @GetMapping("redis")
     public void redis(@RequestParam String name) throws InterruptedException {
