@@ -1,5 +1,6 @@
 package com.yhy.controller;
 
+import com.google.common.util.concurrent.RateLimiter;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -20,6 +21,10 @@ import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 import redis.clients.util.Pool;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletMapping;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -35,6 +40,11 @@ public class TestController {
     @Autowired
     @Qualifier("JEDIS_POOL")
     private Pool<Jedis> jedisPool;
+
+    @GetMapping("test-adaptor")
+    public String testAdaptor(HttpServletRequest request){
+        return "hello";
+    }
 
     @GetMapping("hello")
     public String test(@RequestParam String name){
