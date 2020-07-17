@@ -20,6 +20,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 import redis.clients.util.Pool;
+import sun.misc.GC;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletMapping;
@@ -27,6 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping("test")
@@ -41,8 +45,11 @@ public class TestController {
     @Qualifier("JEDIS_POOL")
     private Pool<Jedis> jedisPool;
 
+    Executor executor = Executors.newFixedThreadPool(10);
+
     @GetMapping("test-adaptor")
     public String testAdaptor(HttpServletRequest request){
+        System.out.println(Thread.currentThread().getName());
         return "hello";
     }
 
