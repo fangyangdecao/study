@@ -41,7 +41,8 @@ public class RedisPoolConfig {
         config.setTestWhileIdle(true);
 
         return new JedisPool(config,
-                "192.168.146.135",
+                /*"192.168.146.135",*/
+                "10.11.0.240",
                 6379,
                 2000,
                 null,

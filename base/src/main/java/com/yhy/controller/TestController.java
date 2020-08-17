@@ -1,5 +1,6 @@
 package com.yhy.controller;
 
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.RateLimiter;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -26,6 +27,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletMapping;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -50,6 +52,32 @@ public class TestController {
     @GetMapping("test-adaptor")
     public String testAdaptor(HttpServletRequest request){
         System.out.println(Thread.currentThread().getName());
+        try (Jedis resource = jedisPool.getResource()){
+            //HashMap<String, String> map = Maps.newHashMap();
+            //map.put("sub",String.valueOf(1));
+            //resource.hmset("test",map);
+            String s = resource.get("travel.reward.100");
+            resource.set("travel:reward:100","1");
+            //resource.set("travel.reward.300","1");
+            //resource.set("travel.reward.600","1");
+            //resource.set("travel.reward.1500","1");
+            //resource.set("travel.reward.6666","1");
+            //resource.set("travel.reward.leopard","1");
+            //resource.set("travel.reward.wartermelon-man","1");
+            System.out.println(s);
+            String s1 = resource.get("travel.reward.300");
+            System.out.println(s1);
+            String s2 = resource.get("travel.reward.600");
+            System.out.println(s2);
+            String s3 = resource.get("travel.reward.1500");
+            System.out.println(s3);
+            String s4 = resource.get("travel.reward.6666");
+            System.out.println(s4);
+            String s5 = resource.get("travel.reward.wartermelon-man");
+            System.out.println(s5);
+            String s6 = resource.get("travel.reward.leopard");
+            System.out.println(s6);
+        }
         return "hello";
     }
 
