@@ -2,30 +2,29 @@ package com.yhy.controller;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.RateLimiter;
+import com.yhy.entity.TestReq;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.internal.LettuceLists;
 import io.lettuce.core.support.ConnectionPoolSupport;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Response;
+import org.springframework.web.bind.annotation.*;
+import redis.clients.jedis.*;
 import redis.clients.util.Pool;
 import sun.misc.GC;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletMapping;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -58,25 +57,6 @@ public class TestController {
             //resource.hmset("test",map);
             String s = resource.get("travel.reward.100");
             resource.set("travel:reward:100","1");
-            //resource.set("travel.reward.300","1");
-            //resource.set("travel.reward.600","1");
-            //resource.set("travel.reward.1500","1");
-            //resource.set("travel.reward.6666","1");
-            //resource.set("travel.reward.leopard","1");
-            //resource.set("travel.reward.wartermelon-man","1");
-            System.out.println(s);
-            String s1 = resource.get("travel.reward.300");
-            System.out.println(s1);
-            String s2 = resource.get("travel.reward.600");
-            System.out.println(s2);
-            String s3 = resource.get("travel.reward.1500");
-            System.out.println(s3);
-            String s4 = resource.get("travel.reward.6666");
-            System.out.println(s4);
-            String s5 = resource.get("travel.reward.wartermelon-man");
-            System.out.println(s5);
-            String s6 = resource.get("travel.reward.leopard");
-            System.out.println(s6);
         }
         return "hello";
     }
@@ -96,9 +76,61 @@ public class TestController {
                 System.out.println(object.get());
             }
         }
-        return "hello" + name;
+        return "hello55" + name;
     }
 
+    @GetMapping("hello2")
+    public String test2(@RequestParam String name){
+        //Object lettuce_pool = applicationContext.getBean("redisPoolConfig");
+            try (Jedis jedis = jedisPool.getResource()) {
+                List<String> list = new ArrayList<>();
+                ScanParams params = new ScanParams();
+                params.match("jujubes2:stolen-uid*");
+                params.count(100);
+                String cursor = "0";
+                while (true) {
+                    ScanResult scanResult = jedis.scan(cursor, params);
+                    List<String> elements = scanResult.getResult();
+                    if (elements != null && elements.size() > 0) {
+                        list.addAll(elements);
+                    }
+                    cursor = scanResult.getStringCursor();
+                    if ("0".equals(cursor)) {
+                        break;
+                    }
+                }
+                //Pipeline pipelined = jedis.pipelined();
+                for (String s : list) {
+                    System.out.println(s);
+                    //pipelined.del(s);
+                }
+                //pipelined.sync();
+
+            }
+        return "hello55" + name;
+    }
+
+/*
+    @GetMapping("hello3")
+    public String test3(@RequestParam String name){
+        //Object lettuce_pool = applicationContext.getBean("redisPoolConfig");
+            try (Jedis jedis = jedisPool.getResource()) {
+                String set = jedis.set("newKing:record:Oman", "[0]");
+                //Long del = jedis.del("newKing:record:Oman");
+                //System.out.println(s);
+                System.out.println(set);
+
+            }
+        return "hello55" + name;
+    }
+*/
+
+    @PostMapping("test-post")
+    /*@ApiImplicitParams({@ApiImplicitParam(name = "body", dataType = "String", paramType = "body")})
+    @ApiOperation(value = "changeState", response = String.class, notes = "code 200 ok")*/
+    public void testPost(@RequestParam String name,@RequestBody TestReq req){
+        System.out.println(req.getList());
+    }
 
     @GetMapping("redis")
     public void redis(@RequestParam String name) throws InterruptedException {
